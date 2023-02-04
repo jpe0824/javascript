@@ -1,0 +1,19 @@
+Positive
+    Print the directory tree with sizes, including the size of directories.
+    Pass through dir using recursion for first pass, using postorder
+        Store data, sizes in an object to refer to in second pass
+        Store files in there own arr
+    Pass through again using preorder to display using two arrays built
+    Include help
+    Include / in function call
+
+
+
+Negative
+    Do not print as you go through
+    Don't start at root
+    No globbing and regex
+    No hidden, system, linked files
+    No interactivity
+    Do not use async
+    Do not use statsync block size, blocks
