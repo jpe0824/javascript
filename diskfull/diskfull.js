@@ -66,11 +66,27 @@ function displayDir(arr) {
       //todo - validate sorting functions actually working
       case "alpha":
         //sort by name
-        arr.children.sort((a, b) => a.name - b.name);
+        arr.children.sort((a, b) => {
+          if (a.name < b.name) {
+            return -1;
+          }
+          if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        });
         break;
       case "exten":
         //sort by extenstion
-        arr.children.sort((a, b) => a.exten - b.exten);
+        arr.children.sort((a, b) => {
+          if (a.exten < b.exten) {
+            return -1;
+          }
+          if (a.exten > b.exten) {
+            return 1;
+          }
+          return 0;
+        });
         break;
       default:
         //sort by size;
