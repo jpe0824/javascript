@@ -6,7 +6,7 @@ let commands = {
   h: false,
   s: false,
   m: false,
-  t: 1,
+  t: false,
   b: false,
 };
 
@@ -95,10 +95,19 @@ function displayDir(arr) {
     }
   }
   //display directories
+  if (commands.t) {
+    if (arr.size < commands.t) {
+      return;
+    }
+  }
   console.group(`${arr.name}   ${arr.size.toLocaleString()} bytes`);
   //display children
   arr.children.forEach((child) => {
-    console.log(`${child.name}   ${child.size.toLocaleString()} bytes`);
+    if (commands.t) {
+      if (child.size >= commands.t) console.log(`${child.name}   ${child.size.toLocaleString()} bytes`);
+    } else {
+      console.log(`${child.name}   ${child.size.toLocaleString()} bytes`);
+    }
   });
   arr.dirChildren.forEach((child) => {
     displayDir(child);
@@ -140,6 +149,13 @@ function main() {
             commands.s = false;
             break;
         }
+      case "-t":
+      case "--threshold":
+        arg = array[index + 1];
+        if (!arg) commands.t = 1;
+        else if (arg.includes("-")) commands.t = 1;
+        else commands.t = array[index + 1];
+        break;
       default:
         break;
     }
