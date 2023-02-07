@@ -47,7 +47,7 @@ function walkTree(path) {
         let file = {
           name: `${dirEntry.name}`,
           size: size,
-          exten: `${exten[1]}`,
+          exten: `${exten[exten.length - 1]}`,
           parent: `${parent.pop()}/`,
         };
 
@@ -97,15 +97,21 @@ function displayDir(dirArr) {
       return;
     }
   }
-  // console.log(filesize(1000000000, { exponent: 2, fullform: true }));
-  console.group(`${dirArr.name}   ${dirArr.size.toLocaleString()} bytes`);
+  // console.log(filesize(1000000000));
+  let bytes = "bytes";
+  if (commands.m) {
+    bytes = "";
+    dirArr.size = filesize(dirArr.size);
+  }
+  console.group(`${dirArr.name}   ${dirArr.size.toLocaleString()} ${bytes}`);
   //display children
   dirArr.children.forEach((child) => {
+    if (commands.m) child.size = filesize(child.size);
     if (commands.t) {
       if (child.size >= commands.t)
-        console.log(`${child.name}   ${child.size.toLocaleString()} bytes`);
+        console.log(`${child.name}   ${child.size.toLocaleString()} ${bytes}`);
     } else {
-      console.log(`${child.name}   ${child.size.toLocaleString()} bytes`);
+      console.log(`${child.name}   ${child.size.toLocaleString()} ${bytes}`);
     }
   });
   dirArr.dirChildren.forEach((child) => {
@@ -146,18 +152,27 @@ function main() {
             commands.s = false;
             break;
         }
+        break;
       case "-t":
       case "--threshold":
         if (!nextArg) commands.t = 1;
         else if (nextArg.includes("-")) commands.t = 1;
         else commands.t = nextArg;
         break;
+      case "-m":
+      case "--metric":
+        commands.m = true;
+        break;
+      case "-b":
+      case "--blocksize":
+        commands.b = true;
+        break;
       default:
         break;
     }
   });
 
-  // console.log(commands);
+  console.log(commands);
   if (commands.h) {
     let text = fs.readFileSync("help.txt", "utf8");
     console.log(`\n${text}\n`);
@@ -175,7 +190,7 @@ function main() {
   };
   dirArr.push(parentDir);
   walkTree(commands.p);
-  console.log(dirArr);
+  // console.log(dirArr);
   displayDir(dirArr[0]);
 }
 
