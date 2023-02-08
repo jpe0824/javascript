@@ -1,0 +1,10 @@
+test/   12,870 bytes
+  one.txt   14 bytes
+  alpha/   54 bytes
+    two.txt   54 bytes
+  beta/   12,802 bytes
+    four.py   20 bytes
+    three.docx   5,452 bytes
+    z.txt   7,330 bytes
+  gamma/   0 bytes
+    delta/   0 bytes

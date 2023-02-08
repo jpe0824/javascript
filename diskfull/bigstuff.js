@@ -1,7 +1,10 @@
 const fs = require("fs");
 const filesize = require("filesize");
 
-const fileData = "";
+const writeConsole = new console.Console(
+  fs.createWriteStream("./bigstuff.txt")
+);
+
 const dirArr = [];
 let commands = {
   p: ".",
@@ -111,7 +114,9 @@ function displayDir(dirArr) {
     dirArr.size = filesize(dirArr.size);
   }
   //display directories
-  console.group(`${dirArr.name}   ${dirArr.size.toLocaleString()} ${bytes}`);
+  writeConsole.group(
+    `${dirArr.name}   ${dirArr.size.toLocaleString()} ${bytes}`
+  );
   //display children
   dirArr.children.forEach((child) => {
     //handles metrics for files
@@ -120,14 +125,18 @@ function displayDir(dirArr) {
     if (commands.t) {
       if (child.size < commands.t);
       else
-        console.log(`${child.name}   ${child.size.toLocaleString()} ${bytes}`);
+        writeConsole.log(
+          `${child.name}   ${child.size.toLocaleString()} ${bytes}`
+        );
     } else
-      console.log(`${child.name}   ${child.size.toLocaleString()} ${bytes}`);
+      writeConsole.log(
+        `${child.name}   ${child.size.toLocaleString()} ${bytes}`
+      );
   });
   dirArr.dirChildren.forEach((child) => {
     displayDir(child);
   });
-  console.groupEnd();
+  writeConsole.groupEnd();
 }
 
 function main() {
