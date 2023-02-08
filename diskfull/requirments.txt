@@ -2,12 +2,17 @@ Positive
     Print the directory tree with sizes, including the size of directories.
     Pass through dir using recursion for first pass, using postorder
         Store data, sizes in an object to refer to in second pass
-        Store files in there own arr
+        Store files in there own object, pass to parent dir
     Pass through again using preorder to display using two arrays built
-    Include help
-    Include / in function call
-
-
+    Include help.txt
+    indlude all args and functionality
+    -h shows all args through help.txt
+    -m returns filesize metric instead of bytes
+    -b returns blocksize
+    -s exten alpha size, sort by respective options
+    -t show only minimum threshold, default of 1
+    -p pass in optional path, turn in POC with test hard coded to default, . for regular default
+    Return all results through a txt file
 
 Negative
     Do not print as you go through
