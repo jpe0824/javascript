@@ -207,6 +207,7 @@ function main() {
   }
   catch(error) {
     console.log('ERROR: Try different path\n\n',error);
+    return;
   }
   displayDir(dirArr[0])
 }
