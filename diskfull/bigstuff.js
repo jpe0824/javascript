@@ -11,7 +11,7 @@ const writeConsole = console.Console(fs.createWriteStream('./bigstuff.txt'))
 
 const dirArr = []
 let commands = {
-  p: 'test', //-p, --path
+  p: 'test', //-p, --path default set to test for POC
   h: false, //-h, --help
   s: false, //-s, --sort
   m: false, //-m, --metric
@@ -156,8 +156,8 @@ function main() {
         break
       case '-p':
       case '--path':
-        if(!nextArg) commands.p = '.'
-        else if(nextArg.includes('-')) commands.p = '.'
+        if(!nextArg) commands.p = 'test'
+        else if(nextArg.includes('-')) commands.p = 'test'
         else commands.p = nextArg
         break
       case '-s':
@@ -202,7 +202,12 @@ function main() {
   }
   dirArr.push(parentDir)
 
-  walkTree(parentDir.name)
+  try{
+    walkTree(parentDir.name)
+  }
+  catch(error) {
+    console.log('ERROR: Try different path\n\n',error);
+  }
   displayDir(dirArr[0])
 }
 
