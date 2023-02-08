@@ -7,7 +7,7 @@ const writeConsole = new console.Console(
 
 const dirArr = [];
 let commands = {
-  p: ".",
+  p: "test",
   h: false,
   s: false,
   m: false,
