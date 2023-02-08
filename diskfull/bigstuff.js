@@ -1,10 +1,10 @@
-//Positive req:
 const fs = require("fs");
 const filesize = require("filesize");
 
+const fileData = "";
 const dirArr = [];
 let commands = {
-  p: "./",
+  p: ".",
   h: false,
   s: false,
   m: false,
@@ -37,12 +37,18 @@ function walkTree(path) {
         }
 
         walkTree(`${path}${dir.name}`);
-      } else if (dirEntry.isFile()) {
+
         //files
+      } else if (dirEntry.isFile()) {
         let size = fs.statSync(`${path}${dirEntry.name}`).size;
         let parent = path.split("/");
         let exten = dirEntry.name.split(".");
         parent.pop();
+
+        //handles blocksize if set
+        if (commands.b) {
+          size = 4096 * Math.ceil(size / 4096);
+        }
 
         let file = {
           name: `${dirEntry.name}`,
@@ -51,6 +57,7 @@ function walkTree(path) {
           parent: `${parent.pop()}/`,
         };
 
+        //handle size and asigns parents/children
         for (let tmpDir of dirArr) {
           if (tmpDir.name == file.parent) {
             tmpDir.size += file.size;
@@ -66,53 +73,56 @@ function walkTree(path) {
 }
 
 function displayDir(dirArr) {
+  //handles sorting commands if set
   if (commands.s) {
     switch (commands.s) {
-      //todo - validate sorting functions actually working
+      //sort by name
       case "alpha":
-        //sort by name
         dirArr.children.sort((a, b) => {
           if (a.name < b.name) return -1;
           if (a.name > b.name) return 1;
           return 0;
         });
         break;
+      //sort by extenstion
       case "exten":
-        //sort by extenstion
         dirArr.children.sort((a, b) => {
           if (a.exten < b.exten) return -1;
           if (a.exten > b.exten) return 1;
           return 0;
         });
         break;
+      //sort by size;
       default:
-        //sort by size;
         dirArr.children.sort((a, b) => b.size - a.size);
         break;
     }
   }
-  //display directories
+  //handles threshold if set for dir
   if (commands.t) {
     if (dirArr.size < commands.t) {
       return;
     }
   }
-  // console.log(filesize(1000000000));
+  //handles metrics if set for dir
   let bytes = "bytes";
   if (commands.m) {
     bytes = "";
     dirArr.size = filesize(dirArr.size);
   }
+  //display directories
   console.group(`${dirArr.name}   ${dirArr.size.toLocaleString()} ${bytes}`);
   //display children
   dirArr.children.forEach((child) => {
+    //handles metrics for files
     if (commands.m) child.size = filesize(child.size);
+    //handles threshold for files
     if (commands.t) {
-      if (child.size >= commands.t)
+      if (child.size < commands.t);
+      else
         console.log(`${child.name}   ${child.size.toLocaleString()} ${bytes}`);
-    } else {
+    } else
       console.log(`${child.name}   ${child.size.toLocaleString()} ${bytes}`);
-    }
   });
   dirArr.dirChildren.forEach((child) => {
     displayDir(child);
@@ -132,8 +142,8 @@ function main() {
         break;
       case "-p":
       case "--path":
-        if (!nextArg) commands.p = "./";
-        else if (nextArg.includes("-")) commands.p = "./";
+        if (!nextArg) commands.p = ".";
+        else if (nextArg.includes("-")) commands.p = ".";
         else commands.p = nextArg;
         break;
       case "-s":
@@ -172,7 +182,7 @@ function main() {
     }
   });
 
-  console.log(commands);
+  //handle help call if set
   if (commands.h) {
     let text = fs.readFileSync("help.txt", "utf8");
     console.log(`\n${text}\n`);
@@ -180,8 +190,7 @@ function main() {
   }
 
   let parentName = commands.p.split("/");
-  parentName.pop();
-
+  //creates dir for starting point
   parentDir = {
     name: `${parentName.pop()}/`,
     size: 0,
@@ -189,8 +198,8 @@ function main() {
     dirChildren: [],
   };
   dirArr.push(parentDir);
-  walkTree(commands.p);
-  // console.log(dirArr);
+
+  walkTree(parentDir.name);
   displayDir(dirArr[0]);
 }
 
