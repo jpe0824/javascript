@@ -1,3 +1,9 @@
+/*
+Project bigstuff V1
+Jason Edman
+CS3380-001
+*/
+
 const fs = require('fs')
 const filesize = require('filesize')
 
