@@ -7,16 +7,18 @@ CS3380-001
 const fs = require('fs')
 const filesize = require('filesize')
 
-const writeConsole = console.Console(fs.createWriteStream('./bigstuff.txt'))
+const WRITE_CONSOLE = console.Console(fs.createWriteStream('./bigstuff.txt'))
+const BLOCK_SIZE = 4096
+const THRESHOLD_MULT = 1_000_000_000
 
 const dirArr = []
-let commands = {
-  p: 'test', //-p, --path default set to test for POC
-  h: false, //-h, --help
-  s: false, //-s, --sort
-  m: false, //-m, --metric
-  t: false, //-t, --threshold
-  b: false, //-b, -blocksize
+const commands = {
+  path: 'test',
+  help: false,
+  sort: false,
+  metric: false,
+  threshold: false,
+  blocksize: false,
 }
 
 function walkTree(path) {
@@ -41,7 +43,10 @@ function walkTree(path) {
         dirArr.push(dir)
 
         for(let tmpDir of dirArr) {
-          if(dir.parent == tmpDir.name) tmpDir.dirChildren.push(dir)
+          if(dir.parent == tmpDir.name) {
+            // tmpDir.size += dir.size
+            tmpDir.dirChildren.push(dir)
+          }
         }
 
         walkTree(`${path}${dir.name}`)
@@ -54,9 +59,7 @@ function walkTree(path) {
         parent.pop()
 
         //handles blocksize if set
-        if(commands.b) {
-          size = 4096 * Math.ceil(size / 4096)
-        }
+        if(commands.blocksize) size = BLOCK_SIZE * Math.ceil(size / BLOCK_SIZE)
 
         let file = {
           name: `${dirEntry.name}`,
@@ -71,7 +74,9 @@ function walkTree(path) {
             tmpDir.size += file.size
             tmpDir.children.push(file)
             for(let nestedDir of dirArr) {
-              if(nestedDir.name == tmpDir.parent) nestedDir.size += file.size
+              if(nestedDir.name == tmpDir.parent) {
+                nestedDir.size += file.size
+              }
             }
           }
         }
@@ -82,9 +87,8 @@ function walkTree(path) {
 
 function displayDir(dirArr) {
   //handles sorting commands if set
-  if(commands.s) {
-    switch(commands.s) {
-      //sort by name
+  if(commands.sort) {
+    switch(commands.sort) {
       case 'alpha':
         dirArr.children.sort((a, b) => {
           if(a.name < b.name) return -1
@@ -92,7 +96,6 @@ function displayDir(dirArr) {
           return 0
         })
         break
-      //sort by extenstion
       case 'exten':
         dirArr.children.sort((a, b) => {
           if(a.exten < b.exten) return -1
@@ -100,99 +103,98 @@ function displayDir(dirArr) {
           return 0
         })
         break
-      //sort by size
       case 'size':
         dirArr.children.sort((a, b) => b.size - a.size)
         break
     }
   }
   //handles threshold if set for dir
-  if(commands.t) {
-    if(dirArr.size < commands.t) {
-      return
-    }
-  }
+  if(commands.threshold) if(dirArr.size < commands.threshold) return
+
   //handles metrics if set for dir
-  let bytes = 'bytes'
-  if(commands.m) {
-    bytes = ''
-    dirArr.size = filesize(dirArr.size)
-  }
+  if(commands.metric) dirArr.size = filesize(dirArr.size)
+
   //display directories
-  writeConsole.group(
-    `${dirArr.name}   ${dirArr.size.toLocaleString()} ${bytes}`
+  WRITE_CONSOLE.group(
+    `${dirArr.name}   ${dirArr.size.toLocaleString()}`
   )
   //display children
   dirArr.children.forEach((child) => {
-    //handles metrics for files
-    if(commands.m) child.size = filesize(child.size)
     //handles threshold for files
-    if(commands.t) {
-      if(child.size < commands.t);
-      else
-        writeConsole.log(
-          `${child.name}   ${child.size.toLocaleString()} ${bytes}`
+    if(commands.threshold) {
+      if(child.size >= commands.threshold) {
+        //handles metrics for files
+        if(commands.metric) child.size = filesize(child.size)
+
+        WRITE_CONSOLE.log(
+          `${child.name}   ${child.size.toLocaleString()}`
         )
-    } else
-      writeConsole.log(
-        `${child.name}   ${child.size.toLocaleString()} ${bytes}`
+      }
+    } else {
+      //handles metrics for files
+      if(commands.metric) child.size = filesize(child.size)
+
+      WRITE_CONSOLE.log(
+        `${child.name}   ${child.size.toLocaleString()}`
       )
+    }
   })
   dirArr.dirChildren.forEach((child) => {
+    // console.log(child)
     displayDir(child)
   })
-  writeConsole.groupEnd()
+  WRITE_CONSOLE.groupEnd()
 }
 
 function main() {
-  const args = process.argv
-
+  const args = process.argv.slice(2)
   args.forEach((arg, index, commandsArr) => {
     nextArg = commandsArr[index + 1]
     switch(arg) {
       case '-h':
       case '--help':
-        commands.h = true
+        commands.help = true
         break
       case '-p':
       case '--path':
-        if(!nextArg) commands.p = 'test'
-        else if(nextArg.includes('-')) commands.p = 'test'
-        else commands.p = nextArg
+        if(!nextArg) commands.path = 'test'
+        else if(nextArg.includes('-')) commands.path = 'test'
+        else commands.path = nextArg
         break
       case '-s':
       case '--sort':
-        if(nextArg === 'alpha') commands.s = 'alpha'
-        if(nextArg === 'exten') commands.s = 'exten'
-        if(nextArg === 'size') commands.s = 'size'
+        if(nextArg === 'alpha') commands.sort = 'alpha'
+        if(nextArg === 'exten') commands.sort = 'exten'
+        if(nextArg === 'size') commands.sort = 'size'
         break
       case '-t':
       case '--threshold':
-        if(!nextArg) commands.t = 1
-        else if(nextArg.includes('-')) commands.t = 1
-        else commands.t = nextArg
+        if(!nextArg) commands.threshold = 1 * THRESHOLD_MULT
+        else if(nextArg.includes('-')) commands.threshold = 1 * THRESHOLD_MULT
+        else commands.threshold = nextArg * THRESHOLD_MULT
         break
       case '-m':
       case '--metric':
-        commands.m = true
+        commands.metric = true
         break
       case '-b':
       case '--blocksize':
-        commands.b = true
+        commands.blocksize = true
         break
       default:
-        break
+        break;
     }
   })
 
   //handle help call if set
-  if(commands.h) {
+  if(commands.help) {
     let text = fs.readFileSync('help.txt', 'utf8')
     console.log(`\n${text}\n`)
     return
   }
 
-  let parentName = commands.p.split('/')
+  let parentName = commands.path.split('/')
+  if(parentName[parentName.length -1] === '') parentName.pop()
   //creates dir for starting point
   parentDir = {
     name: `${parentName.pop()}/`,
