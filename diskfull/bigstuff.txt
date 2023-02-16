@@ -1,35 +1,35 @@
-./   82,290
-  node_modules/   62,131
-    filesize/   62,131
-      lib/   50,698
-        filesize.es6.js   5,353
-        filesize.es6.min.js   2,472
-        filesize.es6.min.js.map   9,184
-        filesize.esm.js   4,893
-        filesize.esm.min.js   2,248
-        filesize.esm.min.js.map   9,183
-        filesize.js   5,682
-        filesize.min.js   2,565
-        filesize.min.js.map   9,118
-      LICENSE   1,509
-      README.md   4,259
-      filesize.d.ts   4,195
-      package.json   1,470
-  test/   12,911
-    alpha/   54
-      two.txt   54
-    beta/   12,802
-      four.py   20
-      three.docx   5,452
-      z.txt   7,330
-    gamma/   41
-      delta/   41
-        something.txt   41
-    one.txt   14
-  bigstuff.js   4,647
-  bigstuff.txt   0
-  help.txt   780
-  package-lock.json   481
-  package.json   53
-  requirments.txt   979
-  something.js   308
+./   83.19 kB
+  node_modules/   62.13 kB
+    filesize/   62.13 kB
+      lib/   50.7 kB
+        filesize.es6.js   5.35 kB
+        filesize.es6.min.js   2.47 kB
+        filesize.esm.js   4.89 kB
+        filesize.esm.min.js   2.25 kB
+        filesize.js   5.68 kB
+        filesize.min.js   2.57 kB
+        filesize.es6.min.js.map   9.18 kB
+        filesize.esm.min.js.map   9.18 kB
+        filesize.min.js.map   9.12 kB
+      LICENSE   1.51 kB
+      package.json   1.47 kB
+      README.md   4.26 kB
+      filesize.d.ts   4.2 kB
+  test/   12.91 kB
+    alpha/   54 B
+      two.txt   54 B
+    beta/   12.8 kB
+      three.docx   5.45 kB
+      four.py   20 B
+      z.txt   7.33 kB
+    gamma/   41 B
+      delta/   41 B
+        something.txt   41 B
+    one.txt   14 B
+  bigstuff.js   4.62 kB
+  something.js   308 B
+  package-lock.json   481 B
+  package.json   53 B
+  bigstuff.txt   923 B
+  help.txt   780 B
+  requirments.txt   979 B
