@@ -90,6 +90,11 @@ function displayDir(dirArr) {
   if(commands.sort) {
     switch(commands.sort) {
       case "alpha":
+        dirArr.dirChildren.sort((a, b) => {
+          if(a.name < b.name) return -1
+          if(a.name > b.name) return 1
+          return 0
+        })
         dirArr.children.sort((a, b) => {
           if(a.name < b.name) return -1
           if(a.name > b.name) return 1
@@ -104,6 +109,7 @@ function displayDir(dirArr) {
         })
         break
       case "size":
+        dirArr.dirChildren.sort((a, b) => b.size - a.size)
         dirArr.children.sort((a, b) => b.size - a.size)
         break
     }
