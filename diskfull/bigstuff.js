@@ -20,10 +20,11 @@ const commands = {
   blocksize: false,
 }
 
-const sortAlpha = (a, b) => (a.name.toLowerCase() > a.name.toLowerCase()) - (a.name.toLowerCase() < b.name.toLowerCase())
-const sortExten = (a, b) => (a.name.split(".").pop() > b.name.split(".").pop()) - (a.name.split(".").pop() < b.name.split(".").pop())
+const sortAlpha = (a, b) => (a.name.toLowerCase() === b.name.toLowerCase()) ? 0
+                            : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)
+const sortExten = (a, b) => (a.name.split(".").pop() === b.name.split(".").pop()) ? 0
+                            : (a.name.split(".").pop() < b.name.split(".").pop() ? -1 : 1)
 const sortSize = (a, b) => b.size - a.size
-
 const sortOrder = {
   "alpha": sortAlpha,
   "exten": sortExten,
@@ -32,7 +33,6 @@ const sortOrder = {
 
 function walkDirTree(path) {
   const dirEntries = fs.readdirSync(path, { withFileTypes: true })
-
   for(let dirEntry of dirEntries) {
     //ignore hidden directories
     if(dirEntry.name.startsWith(".")) continue;
@@ -45,7 +45,6 @@ function walkDirTree(path) {
         dirChildren: [],
       }
       dirArr.push(dir)
-
       let splitPath = path.split("/")
       splitPath.pop()
       let parent = splitPath.pop() + "/"
@@ -53,20 +52,15 @@ function walkDirTree(path) {
       for(let tmpDir of dirArr) {
         if(parent == tmpDir.name) tmpDir.dirChildren.push(dir)
       }
-
       walkDirTree(`${path}${dir.name}`)
-
       //files
-    } else if(dirEntry.isFile()) {
+    } if(dirEntry.isFile()) {
       let size = fs.statSync(`${path}${dirEntry.name}`).size
-      //handles blocksize if set
       if(commands.blocksize) size = 4096 * Math.ceil(size / 4096)
-
       let file = {
         name: `${dirEntry.name}`,
         size: size,
       }
-
       let splitPath = path.split("/")
       splitPath.pop()
       let parent = splitPath.pop() + '/'
@@ -88,22 +82,20 @@ function sumDirSize(dir) {
   }
 }
 
-function displayDir(dirArr) {
+function displayDir(dir) {
   if(commands.sort) {
-    dirArr.dirChildren.sort(sortOrder[commands.sort])
-    dirArr.fileChildren.sort(sortOrder[commands.sort])
+    dir.dirChildren.sort(sortOrder[commands.sort])
+    dir.fileChildren.sort(sortOrder[commands.sort])
   }
-  if(commands.threshold) if(dirArr.size < commands.threshold) return
-  if(commands.metric) dirArr.size = filesize(dirArr.size)
-
+  if(commands.threshold) if(dir.size < commands.threshold) return
+  if(commands.metric) dir.size = filesize(dir.size)
   //display directories
-  WRITE_CONSOLE.group(`${dirArr.name}   ${dirArr.size.toLocaleString()}`)
-  dirArr.dirChildren.forEach((dirChild) => {
+  WRITE_CONSOLE.group(`${dir.name}   ${dir.size.toLocaleString()}`)
+  dir.dirChildren.forEach((dirChild) => {
     displayDir(dirChild)
   })
-
   //display files
-  dirArr.fileChildren.forEach((fileChild) => {
+  dir.fileChildren.forEach((fileChild) => {
     if(commands.threshold) if(fileChild.size < commands.threshold) return
     if(commands.metric) fileChild.size = filesize(fileChild.size)
     WRITE_CONSOLE.log(`${fileChild.name}   ${fileChild.size.toLocaleString()}`)
@@ -150,14 +142,11 @@ function main() {
         break
     }
   })
-
-  //handle help call if set
   if(commands.help) {
     let helpText = fs.readFileSync("help.txt", "utf8")
     console.log(`\n${helpText}\n`)
     return
   }
-
   let parentName = commands.path.split("/")
   if(parentName[parentName.length - 1] === "") parentName.pop()
   //creates dir for starting point
@@ -168,10 +157,9 @@ function main() {
     dirChildren: [],
   }
   dirArr.push(parentDir)
-
   walkDirTree(parentDir.name)
-  sumDirSize(dirArr[0])
-  displayDir(dirArr[0])
+  sumDirSize(parentDir)
+  displayDir(parentDir)
 }
 
 main()
