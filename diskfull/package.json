@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "chalk": "^4.1.2",
-    "eslint-config-cs-3380-style-guide": "^0.0.4",
-    "filesize": "^8.0.7",
-    "glob": "^9.3.1"
-  }
-}
