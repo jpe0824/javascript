@@ -1,13 +1,10 @@
-function makeCounter() {
-    const SpinningChars = '|/-\\'
+function makeAnimation() {
+    let chars = ["⠙", "⠘", "⠰", "⠴", "⠤", "⠦", "⠆", "⠃", "⠋", "⠉"]
     let n = 0
-    return function() {
-        // process.stdout.clearLine();
-        // process.stdout.cursorTo(0);
-        if(n % 997) process.stdout.write(`\b${SpinningChars[n % 4]}`)
+    return () => {
+        if(n % 2131) process.stdout.write(`\r${chars[n % chars.length]} Loading...`)
         n++
     }
-
 }
 
 const tick = makeCounter()

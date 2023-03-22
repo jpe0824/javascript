@@ -1,4 +1,3 @@
-const chalk = require("chalk")
 
 
 function startLoadingBar() {
@@ -65,5 +64,50 @@ function myFunction() {
   console.log('Function completed!');
 }
 
+const fs = require('fs');
+const path = require('path');
+const glob = require('glob');
+const chalk = require('chalk');
 
-myFunction();
+function printFileSize(filepath, depth) {
+  let stats = fs.statSync(filepath);
+  let size = stats.size;
+
+  if (stats.isDirectory()) {
+    console.log(chalk.blue(`${' '.repeat(depth)}${path.basename(filepath)}/`));
+    let files = glob.sync(`${filepath}/**/*`, {nodir: true});
+    let dirSize = 0;
+    for (let i = 0; i < files.length; i++) {
+      let fileStats = fs.statSync(files[i]);
+      dirSize += fileStats.size;
+    }
+    size = dirSize;
+  } else {
+    console.log(`${' '.repeat(depth)}${path.basename(filepath)}`);
+  }
+
+  console.log(`${' '.repeat(depth + 2)} ${chalk.green(`${size}`)}`);
+}
+
+let args = process.argv.slice(2);
+let filepath = args[0] || './';
+
+console.log(chalk.yellow(`Calculating file sizes in ${filepath}\n`));
+
+let files = glob.sync(`${filepath}/**/*`);
+let dirCount = 0;
+let fileCount = 0;
+let totalSize = 0;
+
+for (let i = 0; i < files.length; i++) {
+  let stats = fs.statSync(files[i]);
+  if (stats.isDirectory()) {
+    dirCount++;
+  } else {
+    fileCount++;
+    totalSize += stats.size;
+  }
+  printFileSize(files[i], files[i].split('/').length - 1);
+}
+console.log(chalk.yellow(`\n${fileCount} file${fileCount === 1 ? '' : 's'}, ${dirCount} director${dirCount === 1 ? 'y' : 'ies'}, ${chalk.green(`${totalSize}`)}`));
+

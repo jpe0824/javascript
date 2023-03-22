@@ -1,6 +1,6 @@
-Usage: node bigstuff [arguments]
+Usage: node bigstuffv2 [arguments]
 
--p, --path value, the relative or absolute path name of a file or directory. Default is -p.
+-p, --path value, the relative or absolute path name of a file or directory. Default is -p "./**/*".
 
 -s, --sort alpha | exten | size
         alpha sorts alphabetically (ascending)
@@ -14,6 +14,4 @@ Usage: node bigstuff [arguments]
                 min is the number of billions. min may be an integer like 20
                 or a decimal fraction like 0.25. Default is -t 1.
 
--b, --blocksize, displays the actual storage sizes on disk. default is not blocksize
-
--h, --help prints this usage screen. Ignores all other arguments.
+-h, --help value, prints this usage screen. Ignores all other arguments. Set value as 'es' for spanish.

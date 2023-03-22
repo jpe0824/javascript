@@ -4,45 +4,30 @@ Jason Edman
 CS3380-001
 */
 
-/*
-TODO
-drop block size - done
-print abs path
-colors, chalk.js
-animation while loading
-inefficiencies
-write in i18n and i10n
-    command line arg
-    config file specified as a command line arg
-    default config file
-    lang and locale
-    default
-Globbing
-error handling
-more error handling
-*/
-
 const fs = require("fs")
 const filesize = require("filesize")
 const chalk = require("chalk")
+const { globIterateSync } = require("glob")
 
 const THRESHOLD_MULT = 1_000_000_000
 
-const dirArr = []
+const fileArr = []
 const commands = {
-  path: "test",
+  path: "./**/*",
   help: false,
+  helpLang: "en",
   sort: false,
   metric: false,
   threshold: false,
 }
 
-let errorCheck = false;
+let fileCount = 0
+let totalSize = 0
 
-const sortAlpha = (a, b) => (a.name.toLowerCase() === b.name.toLowerCase()) ? 0
-                            : (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1)
-const sortExten = (a, b) => (a.name.split(".").pop() === b.name.split(".").pop()) ? 0
-                            : (a.name.split(".").pop() < b.name.split(".").pop() ? -1 : 1)
+const sortAlpha = (a, b) => (a.fileName.toLowerCase() === b.fileName.toLowerCase()) ? 0
+                            : (a.fileName.toLowerCase() < b.fileName.toLowerCase() ? -1 : 1)
+const sortExten = (a, b) => (a.fileName.split(".").pop() === b.fileName.split(".").pop()) ? 0
+                            : (a.fileName.split(".").pop() < b.fileName.split(".").pop() ? -1 : 1)
 const sortSize = (a, b) => b.size - a.size
 const sortOrder = {
   "alpha": sortAlpha,
@@ -50,127 +35,63 @@ const sortOrder = {
   "size": sortSize
 }
 
-function walkDirTree(path) {
-  let dirEntries
-  try{
-    dirEntries = fs.readdirSync(path, { withFileTypes: true })
-  } catch(error) {
-    errorCheck = true
-    console.log(chalk.bold.red('\nError: Cannot find or access path.  Please verify path name is correct.'))
-    callHelp()
-    return
-  }
-  for(let dirEntry of dirEntries) {
-    //ignore hidden directories
-    if(dirEntry.name.startsWith(".")) continue;
-    //directories
-    if(dirEntry.isDirectory()) {
-      let dir = {
-        name: `${dirEntry.name}/`,
-        size: 0,
-        fileChildren: [],
-        dirChildren: [],
-      }
-      dirArr.push(dir)
-      let splitPath = path.split("/")
-      splitPath.pop()
-      let parent = splitPath.pop() + "/"
-      //assign dir children to parent
-      for(let tmpDir of dirArr) {
-        if(parent == tmpDir.name) tmpDir.dirChildren.push(dir)
-      }
-      walkDirTree(`${path}${dir.name}`)
-      //files
-    } if(dirEntry.isFile()) {
-      let size = fs.statSync(`${path}${dirEntry.name}`).size
-      let file = {
-        name: `${dirEntry.name}`,
-        size: size,
-      }
-      let splitPath = path.split("/")
-      splitPath.pop()
-      let parent = splitPath.pop() + '/'
-      //assign dir children and add file size to dir
-      for(let tmpDir of dirArr) {
-        if(tmpDir.name == parent) {
-          tmpDir.size += file.size
-          tmpDir.fileChildren.push(file)
-        }
-      }
-    }
-  }
-}
-
-function sumDirSize(dir) {
-  for(let dirChild of dir.dirChildren) {
-    sumDirSize(dirChild)
-    dir.size += dirChild.size
-  }
-}
-
-function displayDir(dir) {
-  if(errorCheck) return
-  if(commands.sort) {
-    dir.dirChildren.sort(sortOrder[commands.sort])
-    dir.fileChildren.sort(sortOrder[commands.sort])
-  }
-  if(commands.threshold) if(dir.size < commands.threshold) return
-  if(commands.metric) dir.size = filesize(dir.size)
-  //display directories
-  console.group(chalk.blue(`${dir.name}   ${dir.size.toLocaleString()}`))
-  dir.dirChildren.forEach((dirChild) => {
-    displayDir(dirChild)
-  })
-  //display files
-  dir.fileChildren.forEach((fileChild) => {
-    if(commands.threshold) if(fileChild.size < commands.threshold) return
-    if(commands.metric) fileChild.size = filesize(fileChild.size)
-    console.log(chalk.green(`${fileChild.name}   ${fileChild.size.toLocaleString()}`))
-  })
-  console.groupEnd()
-}
-
-function callHelp() {
+function callHelp(lang="en") {
   let helpText = fs.readFileSync("help.txt", "utf8")
+  if(lang == "es") helpText = fs.readFileSync("help_es.txt", "utf8")
   console.log(`\n${helpText}\n`)
   return
 }
 
-function startLoadingBar() {
-  let progress = 0;
-  const progressBarLength = 60;
-  const interval = setInterval(() => {
-    progress += 2;
-    const completed = Math.round(progressBarLength * (progress / 100));
-    const remaining = progressBarLength - completed;
-    const progressBar = (`[${' '.repeat(completed)}${' '.repeat(remaining)}]`);
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    process.stdout.write(chalk.green('Loading... ') + chalk.bgGreen(`${progress}% ${progressBar}`));
-  }, 100);
+function globFiles(path="./**/*") {
+  const tick = makeAnimation()
+  for(const file of globIterateSync(path)) {
+    try {
+      tick()
+      let size = fs.statSync(file).size
 
-  // Return the interval ID so we can clear it later
-  return interval;
+      fileCount += 1
+      totalSize += size
+      if(size < commands.threshold) continue
+
+      if(file.includes(".")) {
+        fileObj = {
+          fileName: file,
+          size: size,
+        }
+        fileArr.push(fileObj)
+      }
+    } catch {
+      continue
+    }
+  }
 }
 
-function updateLoadingBar(completed, total) {
-  if(errorCheck) {
-    const progressBarLength = 60;
-    const completedLength = Math.round(progressBarLength * (completed / total));
-    const remainingLength = progressBarLength - completedLength;
-    const progressBar = '[' + chalk.bgRed(`${' '.repeat(completedLength)}`) + chalk.bgGray(`${' '.repeat(remainingLength)}`) + ']';
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    process.stdout.write(chalk.red(`Loading... ${completed}%`) + (`${progressBar}`));
-    return;
+function displayFiles() {
+  if(commands.sort) fileArr.sort(sortOrder[commands.sort])
+  let total = 0
+
+  if(commands.metric) total = filesize(totalSize)
+  else total = totalSize
+
+  const longestPathLen = Math.max(...fileArr.map(item => item.fileName.length))
+  const longestSizeLen = Math.max(...fileArr.map(item => item.size.length))
+
+  for(const file of fileArr) {
+    if(commands.metric) file.size = filesize(file.size)
+    else file.size = file.size.toString()
+
+    console.log(`${chalk.green(file.fileName.padEnd(longestPathLen+2))}${chalk.yellow(file.size.padStart(longestSizeLen))}`)
   }
-  const progressBarLength = 60;
-  const completedLength = Math.round(progressBarLength * (completed / total));
-  const remainingLength = progressBarLength - completedLength;
-  const progressBar = '[' + chalk.bgGreen(`${' '.repeat(completedLength)}`) + chalk.bgGray(`${' '.repeat(remainingLength)}`) + ']';
-  process.stdout.clearLine();
-  process.stdout.cursorTo(0);
-  process.stdout.write(chalk.green(`Loading... ${completed}%`) + (`${progressBar}`));
+  console.log(`\nTotal size: ${chalk.yellow(total)} between ${chalk.yellow(fileCount)} files, in directory: ${commands.path}`)
+}
+
+function makeAnimation() {
+  let chars = ["⠙", "⠘", "⠰", "⠴", "⠤", "⠦", "⠆", "⠃", "⠋", "⠉"]
+  let n = 0
+  return () => {
+      if(n % 2131) process.stdout.write(`\r${chars[n % chars.length]} Loading...`)
+      n++
+  }
 }
 
 function main() {
@@ -180,12 +101,15 @@ function main() {
     switch(arg) {
       case "-h":
       case "--help":
+        if(!nextArg) commands.helpLang = "en"
+        else if(nextArg.includes("-")) commands.helpLang = "en"
+        else commands.helpLang = nextArg
         commands.help = true
         break
       case "-p":
       case "--path":
-        if(!nextArg) commands.path = "test"
-        else if(nextArg.includes("-")) commands.path = "test"
+        if(!nextArg) break
+        else if(nextArg.includes("-")) break
         else commands.path = nextArg
         break
       case "-s":
@@ -193,9 +117,8 @@ function main() {
         if(nextArg === "alpha") commands.sort = "alpha"
         else if(nextArg === "exten") commands.sort = "exten"
         else if(nextArg === "size") commands.sort = "size"
-        else{
-          console.log(chalk.yellow(`\nWARNING: Not sorted. Arg '${arg} ${nextArg}' not accepted, use: 'alpha', 'exten', 'size'.\n`))
-        }
+        else if(nextArg.includes("-")) console.log(chalk.yellow(`\nWARNING: Not sorted. use: -s 'alpha', 'exten', 'size'.\n`))
+        else console.log(chalk.yellow(`\nWARNING: Not sorted. Arg '${arg} ${nextArg}' not accepted, use: 'alpha', 'exten', 'size'.\n`))
         break
       case "-t":
       case "--threshold":
@@ -208,49 +131,30 @@ function main() {
         commands.metric = true
         break
       default:
-        if(arg.includes('-')) {
-          console.log(chalk.yellow(`WARNING: Arg '${arg}' not accepted`))
-          callHelp()
-        }
         break
     }
   })
-  if(commands.help) callHelp()
-  let parentName = commands.path.split("/")
-  if(parentName[parentName.length - 1] === "") parentName.pop()
-  //creates dir for starting point
-  parentDir = {
-    name: `${parentName.pop()}/`,
-    size: 0,
-    fileChildren: [],
-    dirChildren: [],
+  if(commands.help) {
+    callHelp(commands.helpLang)
+    return
   }
 
   try{
-    const loadInterval1 = startLoadingBar()
-    clearInterval(loadInterval1)
-    updateLoadingBar(33,100)
-    const loadInterval2 = startLoadingBar()
-
-    dirArr.push(parentDir)
-    walkDirTree(parentDir.name)
-
-    clearInterval(loadInterval2)
-    updateLoadingBar(66,100)
-    const loadInterval3 = startLoadingBar()
-
-    sumDirSize(parentDir)
-
-    clearInterval(loadInterval3)
-    updateLoadingBar(100,100)
-    console.log()
-
-    displayDir(parentDir)
-  } catch(error) {
-    errorCheck = true
-    console.log(error)
-    // if(error.code == 'ENOENT') console.log('....')
+    globFiles(commands.path)
+  } catch {
+    console.log(chalk.red("An error occured while trying to glob files. Please check all args"))
+    callHelp(commands.helpLang)
+    return
   }
+
+  if(fileCount < 1){
+    console.log(chalk.red(`Error: Could not find files, please check file path or glob pattern.  use: -p "dir/**/*"`))
+    return
+  }
+
+  process.stdout.clearLine()
+  process.stdout.cursorTo(0)
+  displayFiles()
 }
 
 main()
