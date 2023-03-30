@@ -1,17 +1,8 @@
-const chalk = require('chalk');
-
-const files = [
-  'dir1/dir2/dir3/file1.txt',
-  'dir1/dir2/dir3/file2.txt',
-  'dir1/dir2/dir3/file3.txt',
-  'file4.txt',
-  'file5.txt',
-];
-
-files.forEach((file) => {
-  const fileName = file.split('/').slice(-1)[0];
-  const coloredFileName = chalk.blueBright(fileName);
-  const coloredFileString = file.replace(fileName, coloredFileName);
-
-  console.log(coloredFileString);
-});
+let lastEntry = 9001
+let lastPage = 1
+if(lastEntry % 100 === 0) lastPage = Math.floor(lastEntry / 100);
+else lastPage = Math.floor(lastEntry / 100) + 1;
+console.log(lastPage)
+// for(let i = 1; i < 100; i++) {
+//   console.log(lastEntry % 100)
+// }
