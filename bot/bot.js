@@ -21,6 +21,12 @@ client.on("message", (msg) => {
   //Make webscraper for virus count in utah county https://coronavirus.utah.gov/case-counts/
   //Make random dad joke generator/ possibly webscraping, possibly just an array of dad jokes
   //Make die command to kill bot
+  if (msg.content === "!die") {
+    msg.channel.send("Shutting down...");
+    setTimeout(() => {
+      process.exit(1);
+    }, 5000);
+  }
   //text to send to a phone
   //email to send an email
   //music to stream music remotely
