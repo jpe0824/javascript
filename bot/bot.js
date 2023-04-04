@@ -17,6 +17,14 @@ client.on("message", (msg) => {
   if (msg.content === "!lorem") {
     msg.channel.send(lorem());
   }
+  //TODO
+  //Make webscraper for virus count in utah county https://coronavirus.utah.gov/case-counts/
+  //Make random dad joke generator/ possibly webscraping, possibly just an array of dad jokes
+  //Make die command to kill bot
+  //text to send to a phone
+  //email to send an email
+  //music to stream music remotely
+  //weather gets local weather blurb
 });
 
 client.login(process.env.TOKEN);
