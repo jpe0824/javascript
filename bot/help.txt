@@ -1,0 +1,11 @@
+Here are some commands I can do:
+
+!help - displays this help page
+!lorem - produces some lorem ipsum words
+!virus - gives the number of current cases in Utah county
+!dadjoke - tells a random dad joke
+!die - kills me
+!text - sends a text message to someone's phone
+!email - sends an email
+!music - streams music remotely
+!weather - gives a local weather blurb
