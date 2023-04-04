@@ -1,9 +1,6 @@
-const Discord = require("discord.js");
-const client = new Discord.client();
-
-TOKEN = [
-  MTA5Mjg1NzA4NjE1NDY0NTUzNQ.GxG8W7.F41A5RZrsYuFRAiAT6GMwTDRAHbjJfiTt3BYuA,
-];
+require("dotenv").config(); //to start process from .env file
+const { Client, GatewayIntentBits } = require("discord.js");
+const client = new Client();
 
 client.on("ready", () => {
   console.log(`logged in as ${client.user.tag}!`);
@@ -15,4 +12,4 @@ client.on("message", (msg) => {
   }
 });
 
-client.login(TOKEN);
+client.login(process.env.TOKEN);

@@ -85,7 +85,9 @@ function test() {
 
 }
 
-test()
+module.exports = bitArray
+
+// test()
 
 //ELEPHANT GRAVEYARD
 
