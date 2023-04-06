@@ -12,10 +12,10 @@ client.on("message", (msg) => {
   // console.log(`message recieved: ${msg.content}`);
   if (msg.content === "!help") {
     let helpText = fs.readFileSync("help.txt", "utf8");
-    msg.channel.send(`\n${helpText}\n\n`);
+    msg.reply(`\n${helpText}\n\n`);
   }
   if (msg.content === "!lorem") {
-    msg.channel.send(lorem());
+    msg.reply(lorem());
   }
   //TODO
   //Make webscraper for virus count in utah county https://coronavirus.utah.gov/case-counts/

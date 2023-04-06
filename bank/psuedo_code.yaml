@@ -1,0 +1,12 @@
+-generate a file of 2000 hashes (salt 4) taken randomly from:
+  -mcupws.json (1000)
+  -empty string (500)
+  -1 ch alphanumeric (390)
+  -2 ch alphanumeric (100)
+  -3 ch alphanumeric (10)
+-Shuffle your hash list and store in 2K.hashes.txt.
+
+-crack 2K.hashes.txt file:
+  -Do it in a single thread. Multi-threads is the next assignment.
+  -Use synchronous hash matching.
+  -Write 2K.hashes.answers.txt.
