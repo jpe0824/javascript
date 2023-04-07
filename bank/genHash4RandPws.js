@@ -2,8 +2,9 @@ const bcrypt = require('bcryptjs')
 const fs = require('fs')
 const _ = require('lodash')
 
-const alphaNum =
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+const alphaNum = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+const salt = 4
 
 function getRandChars(numChars) {
   let i = 0
@@ -17,6 +18,7 @@ function getRandChars(numChars) {
 }
 
 function main() {
+  console.time(`with salt value of ${salt}`)
   const words = require('./mcupws.json')
 
   const randomPasswords = new Array(1000).fill('').map(() => {
@@ -25,24 +27,24 @@ function main() {
   })
 
   const hashedPasswords = randomPasswords.map((password) =>
-    bcrypt.hashSync(password, 4)
+    bcrypt.hashSync(password, salt)
   )
 
   const emptyHashes = new Array(500).fill('').map(() => bcrypt.hashSync('', 4))
 
   const oneCharHashes = new Array(390).fill('').map(() => {
     const randChar = getRandChars(1)
-    return bcrypt.hashSync(randChar, 4)
+    return bcrypt.hashSync(randChar, salt)
   })
 
   const twoCharHashes = new Array(100).fill('').map(() => {
     const randChars = getRandChars(2)
-    return bcrypt.hashSync(randChars, 4)
+    return bcrypt.hashSync(randChars, salt)
   })
 
   const threeCharHashes = new Array(10).fill('').map(() => {
     const randChars = getRandChars(3)
-    return bcrypt.hashSync(randChars, 4)
+    return bcrypt.hashSync(randChars, salt)
   })
 
   const allHashes = hashedPasswords.concat(
@@ -57,6 +59,7 @@ function main() {
     if (err) throw err
     console.log('Hashes saved to 2K.hashes.txt')
   })
+  console.timeEnd(`with salt value of ${salt}`)
 }
 
 main()
