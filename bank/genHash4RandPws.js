@@ -3,7 +3,6 @@ const fs = require('fs')
 const _ = require('lodash')
 
 const alphaNum = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-
 const salt = 4
 
 function getRandChars(numChars) {
