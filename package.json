@@ -10,7 +10,9 @@
     "glob": "^9.3.1",
     "lodash": "^4.17.21",
     "lorem-ipsum": "^1.0.6",
-    "puppeteer": "^19.8.3"
+    "novelcovid": "^3.0.2",
+    "puppeteer": "^19.8.3",
+    "twilio": "^4.10.0"
   },
   "devDependencies": {
     "jest": "^29.5.0"

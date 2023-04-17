@@ -4,6 +4,22 @@ const lorem = require("lorem-ipsum");
 const { Client, GatewayIntentBits } = require("discord.js");
 const client = new Client();
 
+const twilioClient = require("twilio")(process.env.SID, process.env.AUTH_TOKEN);
+
+function text(message, to) {
+  try {
+    twilioClient.messages
+      .create({
+        body: message,
+        from: "+18775890753",
+        to: `+1${to}`,
+      })
+      .then((message) => console.log(message.sid));
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 client.on("ready", () => {
   console.log(`logged in as ${client.user.tag}!`);
 });
@@ -26,6 +42,21 @@ client.on("message", (msg) => {
     setTimeout(() => {
       process.exit(1);
     }, 5000);
+  }
+  if (msg.content.includes("!text")) {
+    try {
+      const content = msg.content.split(" ");
+      content.shift();
+      const phoneNum = content.shift();
+      console.log(phoneNum);
+      const message = content.join(" ");
+      text(message, phoneNum);
+    } catch (error) {
+      msg.reply(`ERROR: Usage - !text 1234567891 message to send`);
+    }
+    msg.reply(`Message sent to ${phoneNum}`);
+
+    // console.log(msg.content[0])
   }
   //text to send to a phone
   //email to send an email

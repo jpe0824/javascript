@@ -1,4 +1,10 @@
-// const puppeteer = require("puppeteer");
+const api = require('novelcovid');
+
+// you can choose which URL to use, this will not change the behaviour of the API
+api.gov().then(console.log)
+// api.jhucsse.counties().then(console.log)
+
+
 
 // async function scrapeVirus() {
 //   const browser = await puppeteer.launch();
@@ -31,15 +37,21 @@
 // }
 
 // scrapeVirus();
-var covidData = require("covid-usa");
+// var covidData = require("covid-usa");
 
-// latest state level by date
-covidData.stateData((stateData) => {
-  console.log(stateData["2023-03-12"]["Utah"]["Utah County"].cases);
-  // console.log(stateData["2020-03-20"]["California"].deaths);
-  // console.log(stateData["2020-03-20"]["California"].fid);
-  // console.log(stateData["2020-03-20"]["Massachusetts"]["Middlesex"].cases);
-});
+// // latest state level by date
+// covidData.countyData(countyData => {
+//   console.log(countyData["2023-03-10"]["Utah"].cases);
+// });
+// // covidData.allCounties("Utah", (counties) => {
+// //   console.log(counties);
+// // });
+// covidData.stateData((stateData) => {
+//   console.log(stateData["2023-03-12"]["Utah"].cases);
+//   // console.log(stateData["2020-03-20"]["California"].deaths);
+//   // console.log(stateData["2020-03-20"]["California"].fid);
+//   // console.log(stateData["2020-03-20"]["Massachusetts"]["Middlesex"].cases);
+// });
 
 // // list of all states in dataset
 // covidData.allStates(states => {
