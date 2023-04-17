@@ -84,7 +84,6 @@ if (cluster.isMaster) {
   // Divide the tasks into smaller chunks
   const totTaskCount = numCPUs;
   const chunkSize = Math.ceil(encryptedHashes.length / totTaskCount);
-  console.log("chucksize: ", chunkSize);
   let startIndex = 0;
   let tasks = [];
 
@@ -121,7 +120,6 @@ if (cluster.isMaster) {
     if (message.type === "done") {
       tick(totTaskComplete, totTaskCount);
 
-      // console.log(`${totTaskComplete}/${totTaskCount}`);
       if (totTaskComplete < totTaskCount) {
         tasksCompleted++;
         tasks = [];
@@ -146,7 +144,6 @@ if (cluster.isMaster) {
           }
         }
       } else {
-        // if (completedWorkers === numCPUs) {
         process.stdout.clearLine();
         process.stdout.cursorTo(0);
 
@@ -166,7 +163,6 @@ if (cluster.isMaster) {
         for (const id in cluster.workers) {
           cluster.workers[id].kill();
         }
-        // }
       }
     }
   });
