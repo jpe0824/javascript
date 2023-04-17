@@ -6,7 +6,7 @@ const words = require("./mcupws.json");
 
 const alphaNum =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-const HASH_FILE = "./test.2k.hashes.txt";
+const HASH_FILE = "./braden.2k.hashes.txt";
 
 const encryptedHashes = fs
   .readFileSync(HASH_FILE, "utf8")
@@ -82,7 +82,7 @@ if (cluster.isMaster) {
   console.time(`${numCPUs} cores sync`);
 
   // Divide the tasks into smaller chunks
-  const totTaskCount = numCPUs * numCPUs;
+  const totTaskCount = numCPUs;
   const chunkSize = Math.ceil(encryptedHashes.length / totTaskCount);
   console.log("chucksize: ", chunkSize);
   let startIndex = 0;
@@ -108,7 +108,6 @@ if (cluster.isMaster) {
   }
   tick(0, numCPUs);
 
-  let completedWorkers = 0;
   let tasksCompleted = 0;
   let results = [];
   let totTaskComplete = 0;
@@ -147,9 +146,6 @@ if (cluster.isMaster) {
           }
         }
       } else {
-        completedWorkers++;
-        console.log(`completed workers: ${completedWorkers}`);
-
         // if (completedWorkers === numCPUs) {
         process.stdout.clearLine();
         process.stdout.cursorTo(0);
