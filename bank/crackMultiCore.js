@@ -6,7 +6,7 @@ const words = require("./mcupws.json");
 
 const alphaNum =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-const HASH_FILE = "./braden.2k.hashes.txt";
+const HASH_FILE = "./test.2k.hashes.txt";
 
 const encryptedHashes = fs
   .readFileSync(HASH_FILE, "utf8")
@@ -82,9 +82,11 @@ if (cluster.isMaster) {
   console.time(`${numCPUs} cores sync`);
 
   // Divide the tasks into smaller chunks
-  const chunkSize = Math.ceil(encryptedHashes.length / numCPUs);
+  const totTaskCount = numCPUs * numCPUs;
+  const chunkSize = Math.ceil(encryptedHashes.length / totTaskCount);
+  console.log("chucksize: ", chunkSize);
   let startIndex = 0;
-  const tasks = [];
+  let tasks = [];
 
   for (let i = 0; i < numCPUs; i++) {
     const endIndex = Math.min(startIndex + chunkSize, encryptedHashes.length);
@@ -107,18 +109,48 @@ if (cluster.isMaster) {
   tick(0, numCPUs);
 
   let completedWorkers = 0;
+  let tasksCompleted = 0;
   let results = [];
+  let totTaskComplete = 0;
 
   // Collect results from worker processes
   cluster.on("message", (worker, message) => {
     if (message.type === "result") {
       results = results.concat(message.results);
+      totTaskComplete++;
     }
     if (message.type === "done") {
-      completedWorkers++;
-      tick(completedWorkers, numCPUs);
+      tick(totTaskComplete, totTaskCount);
 
-      if (completedWorkers === numCPUs) {
+      // console.log(`${totTaskComplete}/${totTaskCount}`);
+      if (totTaskComplete < totTaskCount) {
+        tasksCompleted++;
+        tasks = [];
+
+        if (tasksCompleted === numCPUs) {
+          for (let i = 0; i < numCPUs; i++) {
+            const endIndex = Math.min(
+              startIndex + chunkSize,
+              encryptedHashes.length
+            );
+            const workerTask = {
+              startIndex,
+              endIndex,
+              taskId: i,
+            };
+            tasks.push(workerTask);
+            startIndex = endIndex;
+          }
+          for (const id in cluster.workers) {
+            cluster.workers[id].send(tasks[id - 1]);
+            tasksCompleted--;
+          }
+        }
+      } else {
+        completedWorkers++;
+        console.log(`completed workers: ${completedWorkers}`);
+
+        // if (completedWorkers === numCPUs) {
         process.stdout.clearLine();
         process.stdout.cursorTo(0);
 
@@ -138,6 +170,7 @@ if (cluster.isMaster) {
         for (const id in cluster.workers) {
           cluster.workers[id].kill();
         }
+        // }
       }
     }
   });
